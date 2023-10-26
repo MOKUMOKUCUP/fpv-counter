@@ -26,6 +26,10 @@ export default function Game() {
     if (id === undefined) return;
     const db = getFirestore(getApp());
     const unsub = onSnapshot(doc(db, "games", id), (doc) => {
+      if (!doc.exists()) {
+        navigate("/");
+        return;
+      }
       const source = doc.metadata.hasPendingWrites ? "Local" : "Server";
       if (source === "Local") return;
       setGame(doc.data() as Game);
