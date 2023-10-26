@@ -83,7 +83,7 @@ export default function Game() {
   }, [game, id]);
 
   const destroy = useCallback(async () => {
-    if (window.confirm("ゲームを削除しますか？")) {
+    if (window.confirm("レースを削除しますか？")) {
       if (game === undefined || id === undefined) return;
       try {
         setSending(true);

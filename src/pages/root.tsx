@@ -35,7 +35,7 @@ export default function Root() {
           to="/new"
           className="bg-black text-white shadow px-6 py-4 rounded-md mx-auto text-lg"
         >
-          新しいゲームを作成する
+          新しいレースを作成する
         </Link>
       </div>
 

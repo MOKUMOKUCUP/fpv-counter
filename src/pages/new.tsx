@@ -40,15 +40,15 @@ export default function New() {
   return (
     <div className="bg-gray-50 h-screen py-6">
       <div className="w-64 mx-auto flex gap-6 flex-col">
-        <h1 className="text-xl font-bold text-center">ゲームを作成する</h1>
+        <h1 className="text-xl font-bold text-center">レースを作成する</h1>
 
         <section>
-          <h3 className="mt-6">① ゲーム名を決める</h3>
+          <h3 className="mt-6">① レース名を決める</h3>
 
           <input
             type="text"
             value={name}
-            placeholder="ゲーム名"
+            placeholder="レース名"
             onChange={(e) => setName(e.target.value)}
             className="border p-2 mt-2 w-full"
           />
@@ -105,7 +105,7 @@ export default function New() {
         </div>
 
         <section>
-          <h3 className="">④ ゲームを作成する</h3>
+          <h3 className="">④ レースを作成する</h3>
           <button
             onClick={handleSubmit}
             className="mt-2 w-full font-bold border p-1 bg-black text-white rounded-md"
