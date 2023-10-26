@@ -102,9 +102,9 @@ export default function Game() {
   if (game === undefined) return <div>Loading...</div>;
 
   const sortedTeams = [...game.teams.sort((a, b) => b.count - a.count)];
-  const notSortedTeams = [
+  const fiedTeams = [
     ...game.teams.sort((a, b) => {
-      if (a.color > b.color) {
+      if (a.id > b.id) {
         return -1;
       } else {
         return 1;
@@ -178,7 +178,7 @@ export default function Game() {
           <button onClick={() => setShowPanel(false)}>パネルを隠す</button>
         </div>
         <div className="flex gap-6 mt-6 mb-2 flex-col px-2">
-          {notSortedTeams.map((team) => (
+          {fiedTeams.map((team) => (
             <div key={team.id} className="flex border-b last:border-b-0 pb-6">
               <div className="flex justify-center items-center text-xl">
                 <div>{team.name}</div>
