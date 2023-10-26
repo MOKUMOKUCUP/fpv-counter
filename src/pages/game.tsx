@@ -110,9 +110,9 @@ export default function Game() {
 
   return (
     <div className="bg-black h-screen p-6">
-      <h1 className="text-white text-xl font-bold">{game.name}</h1>
+      <h1 className="text-white text-2xl font-bold">{game.name}</h1>
 
-      <div className="flex gap-4 flex-col mt-6">
+      <div className="flex gap-6 flex-col mt-6">
         {sortedTeams.map((team) => {
           const rank =
             [...new Set(sortedTeams.map((t) => t.count))].indexOf(team.count) +
@@ -133,11 +133,11 @@ export default function Game() {
                 goal && "border-[#ecd292]"
               )}
             >
-              <div className="bg-white w-10 font-bold text-2xl flex items-center mr-1 rounded-sm">
+              <div className="bg-white w-14 h-14 font-bold text-4xl flex items-center mr-1 rounded-sm">
                 <div className="mx-auto">{rank}</div>
               </div>
               <div
-                className=" text-white p-2 border-l-8"
+                className=" text-white p-2 border-l-8 text-2xl flex items-center"
                 style={{ borderColor: team.color }}
               >
                 {team.name}
@@ -151,7 +151,7 @@ export default function Game() {
               )}
 
               <div className="flex items-center ml-auto">
-                <div className="text-xl text-white">{team.count}</div>
+                <div className="text-3xl text-white">{team.count}</div>
                 {game.maxCount && (
                   <div className="text-xs text-gray-300 ml-1 flex items-center pt-1">
                     <RxSlash /> <div>{game.maxCount}</div>
@@ -164,25 +164,25 @@ export default function Game() {
       </div>
 
       <div
-        className="fixed bottom-0 right-0 left-0 shadow bg-gray-100 p-2 rounded-tl-lg rounded-tr-lg flex flex-col gap-4"
+        className="fixed bottom-0 right-0 left-0 shadow bg-gray-100 p-2 rounded-tl-xl rounded-tr-xl flex flex-col gap-4"
         style={{ display: showPanel ? "block" : "none" }}
       >
-        <div className="border-b flex gap-4 pb-2 text-sm">
+        <div className="border-b flex gap-4 pb-2 text-sm px-2">
           <button onClick={() => navigate("/")}>トップに戻る</button>
           <button onClick={() => destroy()}>削除</button>
           <button onClick={() => reset()}>カウントリセット</button>
           <button onClick={() => setShowPanel(false)}>パネルを隠す</button>
         </div>
-        <div className="flex gap-4 mt-4 flex-col">
+        <div className="flex gap-6 mt-6 mb-2 flex-col px-2">
           {notSortedTeams.map((team) => (
-            <div key={team.id} className="flex">
+            <div key={team.id} className="flex border-b last:border-b-0 pb-6">
               <div className="flex justify-center items-center text-xl">
                 <div>{team.name}</div>
               </div>
-              <div className="ml-auto flex gap-4">
+              <div className="ml-auto flex gap-6">
                 <button
                   className={clsx(
-                    "border w-10 h-10 text-xl shadow",
+                    "border w-12 h-12 text-xl shadow",
                     sending && "shadow-none bg-gray-200"
                   )}
                   onClick={() => count(team.id, 1)}
@@ -191,7 +191,7 @@ export default function Game() {
                 </button>
                 <button
                   className={clsx(
-                    "border w-10 h-10 text-xl shadow",
+                    "border w-12 h-12 text-xl shadow",
                     sending && "shadow-none bg-gray-200"
                   )}
                   onClick={() => count(team.id, -1)}
