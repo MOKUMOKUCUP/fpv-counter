@@ -16,12 +16,14 @@ export default function New() {
   const handleSubmit = async () => {
     const db = getFirestore(getApp());
     const num = Number.isNaN(maxCount) ? 0 : Number(maxCount);
-    const game: Game = {
-      name,
-      ts: Date.now(),
-      teams,
-      maxCount: num === 0 ? undefined : num,
-    };
+    const game: Game = JSON.parse(
+      JSON.stringify({
+        name,
+        ts: Date.now(),
+        teams,
+        maxCount: num === 0 ? undefined : num,
+      })
+    );
     const doc = await addDoc(collection(db, "games"), game);
 
     navigate(`/games/${doc.id}`);
