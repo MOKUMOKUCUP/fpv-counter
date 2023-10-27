@@ -6,8 +6,8 @@ export type Team = {
 };
 
 export type Game = {
+  id: string;
   name: string;
   maxCount?: number;
-  teams: Team[];
   ts: number;
 };

@@ -1,14 +1,18 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import {
+  collection,
   deleteDoc,
   doc,
+  getDoc,
+  getDocs,
   getFirestore,
+  increment,
   onSnapshot,
-  setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { getApp } from "firebase/app";
-import type { Game } from "../utils/firestore";
+import type { Game, Team } from "../utils/firestore";
 import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
 import clsx from "clsx";
 import { RxSlash } from "react-icons/rx";
@@ -17,6 +21,7 @@ import ConfettiExplosion from "react-confetti-explosion";
 export default function Game() {
   const { id } = useParams();
   const [game, setGame] = useState<Game | undefined>(undefined);
+  const [teams, setTeams] = useState<Team[]>([]);
   const navigate = useNavigate();
   const [showPanel, setShowPanel] = useState<boolean>(true);
   const [sending, setSending] = useState<boolean>(false);
@@ -25,15 +30,43 @@ export default function Game() {
   useEffect(() => {
     if (id === undefined) return;
     const db = getFirestore(getApp());
-    const unsub = onSnapshot(doc(db, "games", id), (doc) => {
-      if (!doc.exists()) {
+
+    getDoc(doc(db, "games", id)).then((gameDoc) => {
+      if (!gameDoc.exists()) {
         navigate("/");
         return;
       }
-      const source = doc.metadata.hasPendingWrites ? "Local" : "Server";
-      if (source === "Local") return;
-      setGame(doc.data() as Game);
+      setGame(gameDoc.data() as Game);
     });
+
+    const q = collection(db, `games/${id}/teams`);
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.docs.forEach((doc) => {
+        setTeams((teams) => {
+          if (teams.find((team) => team.id === doc.id)) {
+            return teams;
+          } else {
+            return [...teams, doc.data() as Team];
+          }
+        });
+      });
+
+      querySnapshot.docChanges().forEach((change) => {
+        if (change.type === "modified") {
+          setTeams((teams) => {
+            const nextTeams = teams.map((team) => {
+              if (team.id === change.doc.id) {
+                return change.doc.data() as Team;
+              } else {
+                return team;
+              }
+            });
+            return nextTeams;
+          });
+        }
+      });
+    });
+
     return unsub;
   }, [id]);
 
@@ -43,15 +76,16 @@ export default function Game() {
       try {
         setSending(true);
         const db = getFirestore(getApp());
-        const teams = game.teams.map((team) => {
-          if (team.id === teamId) {
-            return { ...team, count: team.count + delta };
-          } else {
-            return team;
-          }
-        });
-        setGame({ ...game, teams });
-        await setDoc(doc(db, "games", id), { teams }, { merge: true });
+        const team = teams.find((team) => team.id === teamId);
+        if (!team) return;
+
+        try {
+          await updateDoc(doc(db, `games/${id}/teams`, teamId), {
+            count: increment(delta),
+          });
+        } catch (e) {
+          console.error(e);
+        }
       } catch (e) {
         console.error(e);
         window.alert("エラーが発生しました");
@@ -59,7 +93,7 @@ export default function Game() {
         setSending(false);
       }
     },
-    [game, id]
+    [game, id, teams]
   );
 
   const reset = useCallback(async () => {
@@ -68,11 +102,13 @@ export default function Game() {
       try {
         setSending(true);
         const db = getFirestore(getApp());
-        const teams = game.teams.map((team) => {
-          return { ...team, count: 0 };
+        getDocs(collection(db, `games/${id}/teams`)).then((querySnapshot) => {
+          querySnapshot.forEach((d) => {
+            updateDoc(doc(db, `games/${id}/teams`, d.id), {
+              count: 0,
+            });
+          });
         });
-        setGame({ ...game, teams });
-        await setDoc(doc(db, "games", id), { teams }, { merge: true });
       } catch (e) {
         console.error(e);
         window.alert("エラーが発生しました");
@@ -88,6 +124,11 @@ export default function Game() {
       try {
         setSending(true);
         const db = getFirestore(getApp());
+        getDocs(collection(db, `games/${id}/teams`)).then((querySnapshot) => {
+          querySnapshot.forEach((d) => {
+            deleteDoc(doc(db, `games/${id}/teams`, d.id));
+          });
+        });
         await deleteDoc(doc(db, "games", id));
         navigate("/");
       } catch (e) {
@@ -101,13 +142,13 @@ export default function Game() {
 
   if (game === undefined) return <div>Loading...</div>;
 
-  const sortedTeams = [...game.teams.sort((a, b) => b.count - a.count)];
-  const fiedTeams = [
-    ...game.teams.sort((a, b) => {
+  const sortedTeams = [...teams.sort((a, b) => b.count - a.count)];
+  const fixedTeams = [
+    ...teams.sort((a, b) => {
       if (a.id > b.id) {
-        return -1;
-      } else {
         return 1;
+      } else {
+        return -1;
       }
     }),
   ];
@@ -178,7 +219,7 @@ export default function Game() {
           <button onClick={() => setShowPanel(false)}>パネルを隠す</button>
         </div>
         <div className="flex gap-6 mt-6 mb-2 flex-col px-2">
-          {fiedTeams.map((team) => (
+          {fixedTeams.map((team) => (
             <div key={team.id} className="flex border-b last:border-b-0 pb-6">
               <div className="flex justify-center items-center text-xl">
                 <div>{team.name}</div>

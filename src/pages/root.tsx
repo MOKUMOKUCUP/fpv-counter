@@ -3,24 +3,25 @@ import image from "../assets/ai-image.png";
 import { useEffect, useState } from "react";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
 import { getApp } from "firebase/app";
-import { Game } from "../utils/firestore";
+import type { Game } from "../utils/firestore";
 import { format } from "date-fns";
 
-type GameWithId = Game & { id: string };
-
 export default function Root() {
-  const [games, setGames] = useState<GameWithId[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
 
   useEffect(() => {
-    (async () => {
-      const db = getFirestore(getApp());
-      const ref = await getDocs(collection(db, "games"));
-      const games = ref.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as GameWithId[];
-      setGames(games.sort((a, b) => b.ts - a.ts));
-    })();
+    const db = getFirestore(getApp());
+    getDocs(collection(db, "games")).then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        setGames((games) => {
+          if (games.find((game) => game.id === doc.id)) {
+            return games;
+          } else {
+            return [...games, doc.data() as Game];
+          }
+        });
+      });
+    });
   }, []);
 
   return (
