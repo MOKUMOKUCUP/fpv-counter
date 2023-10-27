@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Game, Team } from "../utils/firestore";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, setDoc, doc } from "firebase/firestore";
 import { getApp } from "firebase/app";
 import { ulid } from "ulid";
 
@@ -16,17 +16,28 @@ export default function New() {
   const handleSubmit = async () => {
     const db = getFirestore(getApp());
     const num = Number.isNaN(maxCount) ? 0 : Number(maxCount);
+    const gameId = ulid();
+
+    // for remove undefined
     const game: Game = JSON.parse(
       JSON.stringify({
+        id: gameId,
         name,
         ts: Date.now(),
-        teams,
         maxCount: num === 0 ? undefined : num,
       })
     );
-    const doc = await addDoc(collection(db, "games"), game);
+    const gameDoc = await setDoc(doc(db, "games", gameId), game);
 
-    navigate(`/games/${doc.id}`);
+    for (const team of teams) {
+      const id = ulid();
+      await setDoc(doc(db, "games", gameId, "teams", id), {
+        ...team,
+        id,
+      });
+    }
+
+    navigate(`/games/${gameId}`);
   };
 
   const addTeam = () => {
